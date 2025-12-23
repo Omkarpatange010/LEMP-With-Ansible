@@ -1,0 +1,109 @@
+---
+- name: Install LEMP and deploy custom homepage
+  hosts: targetservers
+  become: yes
+
+  tasks:
+
+    - name: Install NGINX, MariaDB, PHP, PHP-FPM
+      ansible.builtin.dnf:
+        name:
+          - nginx
+          - mariadb105-server
+          - php
+          - php-fpm
+        state: present
+
+    - name: Enable and start services
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        state: started
+        enabled: true
+      loop:
+        - nginx
+        - mariadb
+        - php-fpm
+
+    - name: Deploy custom HTML page
+      ansible.builtin.copy:
+        dest: /usr/share/nginx/html/index.html
+        content: |
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>LEMP Stack Installed Successfully</title>
+            <style>
+              body {
+                font-family: Arial, sans-serif;
+                background: linear-gradient(135deg, #4b0082, #ff1493);
+                color: white;
+                text-align: center;
+                margin: 0;
+                padding: 0;
+              }
+              .container {
+                max-width: 900px;
+                margin: 60px auto;
+                padding: 20px;
+                background: rgba(0, 0, 0, 0.4);
+                border-radius: 12px;
+              }
+              h1 {
+                font-size: 3rem;
+                margin-bottom: .2em;
+              }
+              .cards {
+                display: flex;
+                justify-content: space-around;
+                flex-wrap: wrap;
+                gap: 15px;
+                margin-top: 40px;
+              }
+              .card {
+                background: rgba(255, 255, 255, 0.15);
+                padding: 20px;
+                border-radius: 8px;
+                width: 180px;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+              }
+              .card h2 {
+                margin: .4em 0;
+                font-size: 1.3rem;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <h1>🚀 LEMP Stack Installed Successfully</h1>
+              <p>Amazon Linux | Ansible Automation</p>
+
+              <div class="cards">
+                <div class="card">
+                  <h2>Linux</h2>
+                  <p>Amazon Linux is running and serving as the base OS.</p>
+                </div>
+                <div class="card">
+                  <h2>NGINX</h2>
+                  <p>NGINX web server is installed and running.</p>
+                </div>
+                <div class="card">
+                  <h2>MariaDB</h2>
+                  <p>MariaDB database is installed and active.</p>
+                </div>
+                <div class="card">
+                  <h2>PHP</h2>
+                  <p>PHP and PHP-FPM are installed and working.</p>
+                </div>
+              </div>
+
+              <p style="margin-top:40px; font-weight:bold; color:#7CFC00;">
+                ✔ Automation Completed Successfully Using Ansible
+              </p>
+            </div>
+          </body>
+          </html>
+        owner: nginx
+        group: nginx
+        mode: "0644"
